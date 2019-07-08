@@ -1,0 +1,26 @@
+[Unit]
+Description=Beetok's distributed currency daemon
+After=network.target
+
+[Service]
+User=beetok
+Group=beetok
+
+Type=forking
+PIDFile=/var/lib/beetokd/beetokd.pid
+
+ExecStart=/usr/bin/beetokd -daemon -pid=/var/lib/beetokd/beetokd.pid \
+          -conf=/etc/beetok/beetok.conf -datadir=/var/lib/beetokd
+
+ExecStop=-/usr/bin/beetok-cli -conf=/etc/beetok/beetok.conf \
+         -datadir=/var/lib/beetokd stop
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

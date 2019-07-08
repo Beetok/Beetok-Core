@@ -1,0 +1,26 @@
+# /etc/conf.d/beetokd: config file for /etc/init.d/beetokd
+
+# Config file location
+#BITCOIND_CONFIGFILE="/etc/beetok/beetok.conf"
+
+# What directory to write pidfile to?  (created and owned by $BITCOIND_USER)
+#BITCOIND_PIDDIR="/var/run/beetokd"
+
+# What filename to give the pidfile
+#BITCOIND_PIDFILE="${BITCOIND_PIDDIR}/beetokd.pid"
+
+# Where to write beetokd data (be mindful that the blockchain is large)
+#BITCOIND_DATADIR="/var/lib/beetokd"
+
+# User and group to own beetokd process
+#BITCOIND_USER="beetok"
+#BITCOIND_GROUP="beetok"
+
+# Path to beetokd executable
+#BITCOIND_BIN="/usr/bin/beetokd"
+
+# Nice value to run beetokd under
+#BITCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+BITCOIND_OPTS=""
