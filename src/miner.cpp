@@ -502,19 +502,24 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
         pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(pblock->vtx[0]);
 
         if (fProofOfStake) {
-            if (! IsSporkActive(SPORK_21_SEGWIT_ON_COINBASE)) {
+			if (STAKING_ON_SEGWIT < pindexPrev->nTime) {
                 bool fHaveWitness = false;
                 for (size_t t = 1; t < pblock->vtx.size(); t++) {
                     if (!pblock->vtx[t].wit.IsNull()) {
                         fHaveWitness = true;
                         break;
                     }
-                }
-                if (fHaveWitness) {
+                }if (fHaveWitness) {
                     if (fDebug) {
-                        LogPrintf("CreateNewBlock : staking-on-segwit block found but the feature is not enabled.\n");
-                    }
-                    return NULL;
+						//LogPrintf("CreateNewBlock : staking-on-segwit block found but the feature is not enabled.\n");
+						LogPrintf("CreateNewBlock : Accepted staking-on-segwit block found and was turned on 07/21/2019 @ 3:34pm (UTC).\n");
+					}
+
+				}else if (STAKING_ON_SEGWIT > pindexPrev->nTime) {
+					if (fDebug) {
+						LogPrintf("CreateNewBlock : Dang staking-on-segwit block found but current time is before 07/21/2019 @ 3:34pm (UTC).\n");
+						return NULL;
+					}
                 }
             }
         }
