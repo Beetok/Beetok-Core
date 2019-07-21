@@ -502,7 +502,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
         pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(pblock->vtx[0]);
 
         if (fProofOfStake) {
-			(STAKING_ON_SEGWIT < pindexPrev->nTime) {
+			if (STAKING_ON_SEGWIT < pindexPrev->nTime) {
                 bool fHaveWitness = false;
                 for (size_t t = 1; t < pblock->vtx.size(); t++) {
                     if (!pblock->vtx[t].wit.IsNull()) {
