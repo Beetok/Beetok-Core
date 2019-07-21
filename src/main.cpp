@@ -4198,7 +4198,7 @@ int64_t GetBlockValue(int nHeight)
                     return state.DoS(100, error("CheckBlock() : more than one coinbase"),
                         REJECT_INVALID, "bad-cb-multiple");
 
-            if (block.IsProofOfStake()) {
+            /*if (block.IsProofOfStake()) {
                 int commitpos = GetWitnessCommitmentIndex(block);
                 if (commitpos >= 0) {
                     if (IsSporkActive(SPORK_21_SEGWIT_ON_COINBASE)) {
@@ -4223,7 +4223,21 @@ int64_t GetBlockValue(int nHeight)
                 for (unsigned int i = 2; i < block.vtx.size(); i++)
                     if (block.vtx[i].IsCoinStake())
                         return state.DoS(100, error("CheckBlock() : more than one coinstake"));
-            }
+            }*/
+
+			if ((block.IsProofOfStake())) {
+				// Coinbase output should be empty if proof-of-stake block
+				int commitpos = GetWitnessCommitmentIndex(block);
+				if (block.vtx[0].vout.size() != (commitpos == -1 ? 1 : 2) || !block.vtx[0].vout[0].IsEmpty())
+					return state.DoS(100, false, REJECT_INVALID, "bad-cb-missing", false, "coinbase output not empty for proof-of-stake block");
+
+				// Second transaction must be coinstake, the rest must not be
+				if (block.vtx.empty() || !block.vtx[1].IsCoinStake())
+					return state.DoS(100, error("%s: second tx is not coinstake", __func__));
+				for (unsigned int i = 2; i < block.vtx.size(); i++)
+					if (block.vtx[i].IsCoinStake())
+						return state.DoS(100, error("%s: more than one coinstake", __func__));
+			}
 
 			// Credit to BarryStyle for this code used in Merge Project
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4327,13 +4341,16 @@ int64_t GetBlockValue(int nHeight)
             if (pindexPrev == NULL)
                 return error("%s: null pindexPrev for block %s", __func__, block.GetHash().GetHex());
 
-            unsigned int nBitsRequired = GetNextWorkRequired(pindexPrev, &block);
+			if (BLOCK_TIME_TARGET < pindexPrev->nTime) {
+				unsigned int nBitsRequired = GetNextWorkRequired(pindexPrev, &block);
+				LogPrintf("Check Block Time : Accepting block with either 60 -120 seconds before.\n");
+
+				if (block.nBits != nBitsRequired)
+					return error("%s: incorrect proof of work at %d", __func__, pindexPrev->nHeight + 1);
+			}
 
             if (block.IsProofOfWork() && pindexPrev->nHeight + 1 > chainParams.LAST_POW_BLOCK())
                 return error("%s: reject proof-of-work at height %d", __func__, pindexPrev->nHeight + 1);
-
-            if (block.nBits != nBitsRequired)
-                return error("%s: incorrect proof of work at %d", __func__, pindexPrev->nHeight + 1);
 
             if (block.IsProofOfStake()) {
                 uint256 hashProofOfStake;
@@ -4544,42 +4561,39 @@ int64_t GetBlockValue(int nHeight)
             // * There must be at least one output whose scriptPubKey is a single 36-byte push, the first 4 bytes of which are
             //   {0xaa, 0x21, 0xa9, 0xed}, and the following 32 bytes are SHA256(witness root, witness nonce). In case there are
             //   multiple, the last one is used.
-            bool fHaveWitness = false;
-            if (GetSporkValue(SPORK_18_SEGWIT_ACTIVATION) < pindexPrev->nTime) {
-                int commitpos = GetWitnessCommitmentIndex(block);
-                if (commitpos != -1) {
-                    if (!IsSporkActive(SPORK_21_SEGWIT_ON_COINBASE)) {
-                        if (fDebug) {
-                            LogPrintf("CheckBlock() : staking-on-segwit is not enabled.\n");
-                        }
-                        return false;
-                    }
+			bool fHaveWitness = false;
+			if (STAKING_ON_SEGWIT < pindexPrev->nTime) {
+				int commitpos = GetWitnessCommitmentIndex(block);
+				if (commitpos != -1) {
+					bool malleated = false;
+					uint256 hashWitness = BlockWitnessMerkleRoot(block, &malleated);
+					// The malleation check is ignored; as the transaction tree itself
+					// already does not permit it, it is impossible to trigger in the
+					// witness tree.
 
+					if (block.vtx[0].wit.vtxinwit.size() != 1 || block.vtx[0].wit.vtxinwit[0].scriptWitness.stack.size() != 1 || block.vtx[0].wit.vtxinwit[0].scriptWitness.stack[0].size() != 32) {
+						return state.DoS(100, error("%s : invalid witness nonce size", __func__), REJECT_INVALID, "bad-witness-nonce-size", true);
+					}
+					CHash256().Write(hashWitness.begin(), 32).Write(&block.vtx[0].wit.vtxinwit[0].scriptWitness.stack[0][0], 32).Finalize(hashWitness.begin());
+					if (memcmp(hashWitness.begin(), &block.vtx[0].vout[commitpos].scriptPubKey[6], 32)) {
+						return state.DoS(100, error("%s : witness merkle commitment mismatch", __func__), REJECT_INVALID, "bad-witness-merkle-match", true);
+					}
+					fHaveWitness = true;
+					//Remove this log when everything is working correctly for a period of time.
+					LogPrintf("CheckBlock() : Boom staking-on-segwit was turned on 07/21/2019 @ 3:34pm (UTC).\n");
+				}
+			}
 
-                    bool malleated = false;
-                    uint256 hashWitness = BlockWitnessMerkleRoot(block, &malleated);
-                    // The malleation check is ignored; as the transaction tree itself
-                    // already does not permit it, it is impossible to trigger in the
-                    // witness tree.
-                    if (block.vtx[0].wit.vtxinwit.size() != 1 || block.vtx[0].wit.vtxinwit[0].scriptWitness.stack.size() != 1 || block.vtx[0].wit.vtxinwit[0].scriptWitness.stack[0].size() != 32) {
-                        return state.DoS(100, error("%s : invalid witness nonce size", __func__), REJECT_INVALID, "bad-witness-nonce-size", true);
-                    }
-                    CHash256().Write(hashWitness.begin(), 32).Write(&block.vtx[0].wit.vtxinwit[0].scriptWitness.stack[0][0], 32).Finalize(hashWitness.begin());
-                    if (memcmp(hashWitness.begin(), &block.vtx[0].vout[commitpos].scriptPubKey[6], 32)) {
-                        return state.DoS(100, error("%s : witness merkle commitment mismatch", __func__), REJECT_INVALID, "bad-witness-merkle-match", true);
-                    }
-                    fHaveWitness = true;
-                }
-            }
-
-            // No witness data is allowed in blocks that don't commit to witness data, as this would otherwise leave room for spam
-            if (!fHaveWitness) {
-                for (size_t i = 0; i < block.vtx.size(); i++) {
-                    if (!block.vtx[i].wit.IsNull()) {
-                        return state.DoS(100, error("%s : unexpected witness data found", __func__), REJECT_INVALID, "unexpected-witness", true);
-                    }
-                }
-            }
+			// No witness data is allowed in blocks that don't commit to witness data, as this would otherwise leave room for spam
+			if (!fHaveWitness) {
+				for (size_t i = 0; i < block.vtx.size(); i++) {
+					if (!block.vtx[i].wit.IsNull()) {
+						//return state.DoS(100, error("%s : unexpected witness data found", __func__), REJECT_INVALID, "unexpected-witness", true);
+						LogPrintf("Before Full Segwit : Unexpected witness data found on this block prior to 07/21/2019 @ 3:34pm (UTC).\n");
+						fHaveWitness = true;
+					}
+				}
+			}
 
             // After the coinbase witness nonce and commitment are verified,
             // we can check if the block cost passes (before we've checked the

@@ -12,7 +12,7 @@
  * network protocol versioning
  * Forked from Tfinch work
  */
-static const int PROTOCOL_VERSION = 72008;
+static const int PROTOCOL_VERSION = 72009;
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 209;
@@ -21,8 +21,8 @@ static const int INIT_PROTO_VERSION = 209;
 static const int GETHEADERS_VERSION = 70077;
 
 //! disconnect from peers older than this proto version
-static const int MIN_PEER_PROTO_VERSION_BEFORE_ENFORCEMENT = 72007;
-static const int MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT = 72008;
+static const int MIN_PEER_PROTO_VERSION_BEFORE_ENFORCEMENT = 72008;
+static const int MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT = 72009;
 
 static const int MIN_PEER_VERSION_FIXED_SIGTIME = 72006;
 
@@ -53,5 +53,10 @@ static const int MEMPOOL_GD_VERSION = 60002;
 //! "filter*" commands are disabled without NODE_BLOOM after and including this version
 static const int NO_BLOOM_VERSION = 70005;
 
+//! This is block time 07/21/2019 @ 2:56am (UTC) block 18400
+static const int BLOCK_TIME_TARGET = 1563677813;
+
+//! Staking on Segwit 07/21/2019 @ 3:34pm (UTC)
+static const int STAKING_ON_SEGWIT = 1563723293;
 
 #endif // BITCOIN_VERSION_H
