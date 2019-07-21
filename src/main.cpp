@@ -6869,7 +6869,7 @@ int64_t GetBlockValue(int nHeight)
 		
         int ActiveProtocol()
         {
-            if (IsSporkActive(SPORK_14_NEW_PROTOCOL_ENFORCEMENT))
+            if (IsSporkActive(SPORK_15_NEW_PROTOCOL_ENFORCEMENT_2))
                 return MIN_PEER_PROTO_VERSION_AFTER_ENFORCEMENT;
             return MIN_PEER_PROTO_VERSION_BEFORE_ENFORCEMENT;
         }
