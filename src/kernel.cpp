@@ -256,10 +256,8 @@ bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifier, int
 
     // loop to find the stake modifier later by a selection interval
     while (nStakeModifierTime < pindexFrom->GetBlockTime() + nStakeModifierSelectionInterval) {
-        if (!pindexNext) {
-            // Should never happen
-            return error("Null pindexNext\n");
-        }
+        if (!pindexNext && nStakeModifier)
+            return true;
 
         pindex = pindexNext;
         pindexNext = chainActive[pindexNext->nHeight + 1];
