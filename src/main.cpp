@@ -2238,7 +2238,7 @@ int64_t GetBlockValue(int nHeight)
 
 			if (nHeight < 200) {ret = 0; } 
 			else if (nHeight < 20000 && nHeight > 200) {ret = blockValue * 0.9;}
-			else if (nHeight < 30000) {ret = blockValue * 0.9025;}
+			else if (nHeight <= 30000) {ret = blockValue * 0.9025;}
 			else if (nHeight < 40000) {ret = blockValue * 0.905;}
 			else if (nHeight < 50000) {ret = blockValue * 0.9075;}
 			else if (nHeight < 60000) {ret = blockValue * 0.91;}
