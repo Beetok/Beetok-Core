@@ -148,6 +148,7 @@ int64_t GetSporkValue(int nSporkID)
         if (nSporkID == SPORK_21_SEGWIT_ON_COINBASE) r = SPORK_21_SEGWIT_ON_COINBASE_DEFAULT;
         if (nSporkID == SPORK_22_NEW_COLLATERAL) r = SPORK_22_NEW_COLLATERAL_DEFAULT;
 		//if (nSporkID == SPORK_23_BLOCK_TIME_RETARGET) r = SPORK_23_BLOCK_TIME_RETARGET_DEFAULT;
+		if (nSporkID == SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3) r = SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3_DEFAULT;
 
         if (r == -1) LogPrintf("GetSpork::Unknown Spork %d\n", nSporkID);
     }
@@ -183,6 +184,7 @@ bool IsSporkActive(int nSporkID)
         if (nSporkID == SPORK_21_SEGWIT_ON_COINBASE) r = SPORK_21_SEGWIT_ON_COINBASE_DEFAULT;
         if (nSporkID == SPORK_22_NEW_COLLATERAL) r = SPORK_22_NEW_COLLATERAL_DEFAULT;
 		//if (nSporkID == SPORK_23_BLOCK_TIME_RETARGET) r = SPORK_23_BLOCK_TIME_RETARGET_DEFAULT;
+		if (nSporkID == SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3) r = SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3_DEFAULT;
 
         if (r == -1) LogPrintf("GetSpork::Unknown Spork %d\n", nSporkID);
     }
@@ -348,6 +350,7 @@ int CSporkManager::GetSporkIDByName(std::string strName)
     if (strName == "SPORK_21_SEGWIT_ON_COINBASE") return SPORK_21_SEGWIT_ON_COINBASE;
     if (strName == "SPORK_22_NEW_COLLATERAL") return SPORK_22_NEW_COLLATERAL;
 	//if (strName == "SPORK_23_BLOCK_TIME_RETARGET") return SPORK_23_BLOCK_TIME_RETARGET;
+	if (strName == "SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3") return SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3;
 
     return -1;
 }
@@ -374,6 +377,7 @@ std::string CSporkManager::GetSporkNameByID(int id)
     if (id == SPORK_21_SEGWIT_ON_COINBASE) return "SPORK_21_SEGWIT_ON_COINBASE";
     if (id == SPORK_22_NEW_COLLATERAL) return "SPORK_22_NEW_COLLATERAL";
 	//if (id == SPORK_23_BLOCK_TIME_RETARGET) return "SPORK_23_BLOCK_TIME_RETARGET";
+	if (id == SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3) return "SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3"
 
     return "Unknown";
 }
