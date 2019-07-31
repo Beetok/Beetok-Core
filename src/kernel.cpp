@@ -95,7 +95,7 @@ static bool SelectBlockFromCandidates(
             break;
 
         //if the lowest block height (vSortedByTimestamp[0]) is >= switch height, use new modifier calc
-        if (fFirstRun){
+        if (fFirstRun) {
             fModifierV2 = pindex->nHeight >= Params().ModifierUpgradeBlock();
             fFirstRun = false;
         }
@@ -105,7 +105,7 @@ static bool SelectBlockFromCandidates(
 
         // compute the selection hash by hashing an input that is unique to that block
         uint256 hashProof;
-        if(fModifierV2)
+        if (fModifierV2)
             hashProof = pindex->GetBlockHash();
         else
             hashProof = pindex->IsProofOfStake() ? 0 : pindex->GetBlockHash();
@@ -256,18 +256,19 @@ bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifier, int
 
     // loop to find the stake modifier later by a selection interval
     while (nStakeModifierTime < pindexFrom->GetBlockTime() + nStakeModifierSelectionInterval) {
-        if (!pindexNext && nStakeModifier)
+        if (!pindexNext) {       
+            LogPrintf("This should never happen but just forcing it through.\n");
             return true;
-
-        pindex = pindexNext;
-        pindexNext = chainActive[pindexNext->nHeight + 1];
-        if (pindex->GeneratedStakeModifier()) {
-            nStakeModifierHeight = pindex->nHeight;
-            nStakeModifierTime = pindex->GetBlockTime();
-        }
     }
-    nStakeModifier = pindex->nStakeModifier;
-    return true;
+    pindex = pindexNext;
+    pindexNext = chainActive[pindexNext->nHeight + 1];
+    if (pindex->GeneratedStakeModifier()) {
+        nStakeModifierHeight = pindex->nHeight;
+        nStakeModifierTime = pindex->GetBlockTime();
+    }
+}
+nStakeModifier = pindex->nStakeModifier;
+return true;
 }
 
 uint256 stakeHash(unsigned int nTimeTx, CDataStream ss, unsigned int prevoutIndex, uint256 prevoutHash, unsigned int nTimeBlockFrom)
@@ -299,7 +300,7 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock blockFrom, const CTra
 
     if (nTimeBlockFrom + StakeMinAgev2() > nTimeTx) // Min age requirement
         return false;
-        //return error("CheckStakeKernelHash() : min age violation - nTimeBlockFrom=%d StakeMinAgev2()=%d nTimeTx=%d", nTimeBlockFrom, StakeMinAgev2(), nTimeTx);
+    //return error("CheckStakeKernelHash() : min age violation - nTimeBlockFrom=%d StakeMinAgev2()=%d nTimeTx=%d", nTimeBlockFrom, StakeMinAgev2(), nTimeTx);
 
     //grab difficulty
     uint256 bnTargetPerCoinDay;
@@ -383,7 +384,7 @@ bool CheckProofOfStake(const CBlock block, uint256& hashProofOfStake)
 
     //verify signature and script
     if (!VerifyScript(txin.scriptSig, txPrev.vout[txin.prevout.n].scriptPubKey,
-        tx.wit.vtxinwit.size() > 0 ? &tx.wit.vtxinwit[0].scriptWitness : NULL, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&tx, 0, txPrev.vout[txin.prevout.n].nValue)))
+            tx.wit.vtxinwit.size() > 0 ? &tx.wit.vtxinwit[0].scriptWitness : NULL, STANDARD_SCRIPT_VERIFY_FLAGS, TransactionSignatureChecker(&tx, 0, txPrev.vout[txin.prevout.n].nValue)))
         return error("CheckProofOfStake() : VerifySignature failed on coinstake %s", tx.GetHash().ToString().c_str());
 
     CBlockIndex* pindex = NULL;
@@ -399,9 +400,9 @@ bool CheckProofOfStake(const CBlock block, uint256& hashProofOfStake)
         return error("CheckProofOfStake(): INFO: failed to find block");
 
     unsigned int nInterval = 0;
-	unsigned int nTime = block.nTime;
+    unsigned int nTime = block.nTime;
 
-        if (!CheckStakeKernelHash(block.nBits, blockprev, txPrev, txin.prevout, nTime, nInterval, true, hashProofOfStake, fDebug) && (nTime > 1505247602))
+    if (!CheckStakeKernelHash(block.nBits, blockprev, txPrev, txin.prevout, nTime, nInterval, true, hashProofOfStake, fDebug) && (nTime > 1505247602))
         return error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s, hashProof=%s \n", tx.GetHash().ToString().c_str(), hashProofOfStake.ToString().c_str()); // may occur during initial download or if behind on block chain sync
 
     return true;
