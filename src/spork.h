@@ -27,7 +27,7 @@ using namespace boost;
     Sporks 11,12, and 16 to be removed with 1st zerocoin release
 */
 #define SPORK_START 10001
-#define SPORK_END 10025
+#define SPORK_END 10027
 
 #define SPORK_2_SWIFTTX 10001
 #define SPORK_3_SWIFTTX_BLOCK_FILTERING 10002
@@ -49,7 +49,7 @@ using namespace boost;
 #define SPORK_21_SEGWIT_ON_COINBASE 10024
 #define SPORK_22_NEW_COLLATERAL 10025
 //#define SPORK_23_BLOCK_TIME_RETARGET 10026
-#define SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3 10024
+#define SPORK_24_NEW_PROTOCOL_ENFORCEMENT_3 10027
 
 
 #define SPORK_2_SWIFTTX_DEFAULT 978307200                         //2001-1-1
