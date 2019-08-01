@@ -8,8 +8,8 @@ cd ..
 CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
 make
 cd src
-strip beetokd
-strip beetok-cli
-strip beetok-tx
+strip beetokd.exe
+strip beetok-cli.exe
+strip beetok-tx.exe
 cd qt
 strip beetok-qt.exe
